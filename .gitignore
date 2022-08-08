@@ -1,0 +1,6 @@
+# Pycharm
+# If you are using PyCharm #
+.idea/
+
+#Dataset
+*.bz2
