@@ -9,7 +9,7 @@ def process(data):
     data = regexExp.reCite.sub('', data)
     data = regexExp.reFile.sub('', data)
     tokens = textProcessor.tokenize(data)
-    return textProcessor.stem_and_stop(tokens), len(tokens)
+    return textProcessor.stem_and_stop(tokens)
 
 
 def process_category(data):

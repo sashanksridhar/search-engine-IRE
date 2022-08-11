@@ -13,6 +13,7 @@ def tokenize(data):
 	data = re.sub(
 		r'\—|\%|\$|\'|\||\.|\*|\[|\]|\:|\;|\,|\{|\}|\(|\)|\=|\+|\-|\_|\#|\!|\`|\"|\?|\/|\>|\<|\&|\\|\u2013|\n', r' ',
 		data)  # removing special characters
+	data = re.sub(r'\d', '', data).strip()
 	return data.split()
 
 def make_lower(data):

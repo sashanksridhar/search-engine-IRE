@@ -2,5 +2,6 @@
 # If you are using PyCharm #
 .idea/
 .pycache/
+*.pyc
 #Dataset
 *.bz2
