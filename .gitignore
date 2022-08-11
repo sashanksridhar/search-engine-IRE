@@ -1,6 +1,6 @@
 # Pycharm
 # If you are using PyCharm #
 .idea/
-
+.pycache/
 #Dataset
 *.bz2
