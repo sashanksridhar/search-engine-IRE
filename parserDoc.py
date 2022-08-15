@@ -105,8 +105,7 @@ class DocParser(xml.sax.ContentHandler):
                     tag + str(text_frequency[term][tag]) for tag in text_frequency[term] if
                     text_frequency[term][tag] != 0))
 
-            if self.page_count%1000 == 0:
-                print(self.page_count)
+
             if self.page_count % 30000 == 0:
 
                 self.writer.writing_to_file(self.inverted_index, self.file_count, os.path.join(self.index_dir, 'intermediate'))

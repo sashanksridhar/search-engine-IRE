@@ -4,8 +4,9 @@ import heapq
 import shutil
 class Writer():
     def writing_to_file(self, Inverted_Index, File_count, file_path):
-        print(file_path)
+
         path_to_write = os.path.join(file_path, str(File_count) + '.txt')
+        print(path_to_write)
         # print("File",str(File_count))
         value = list()
         file_pointer = open(path_to_write, 'w+', encoding='utf-8')
