@@ -1,168 +1,120 @@
 import gevent
-from nltk.stem import PorterStemmer
-from regexExp import *
-from string import printable
+from Stemmer import Stemmer
+import re
+from nltk.tokenize import wordpunct_tokenize
+from nltk.corpus import stopwords
 
-class PageProcessor(object):
-    """
-        Document class which handles
-        tokenization, indexing, etc
-    """
+class PageProcessor():
 
-    # --------------------------------------------------------------------------
-    def __init__(self, page_id, title, text, complete_index):
+    def __init__(self):
+        self.stemmer = Stemmer('english')
+        self.stop_words = list(stopwords.words('english'))
 
-        self.page_id = page_id
-        self.title = title.lower()
-        self.refernces = ""
-        self.external_links = ""
-        self.categories = []
-        self.text = text.lower()
-        self.category_size = {"R": 0, "T": 0, "B": 0, "C": 0, "E": 0}
-        self.stemmer = PorterStemmer()
-        self.complete_index = complete_index
-        self.sections(self.text)
+    def title_processing(self, title_string):
 
+        title_frequency = dict()
 
-    # --------------------------------------------------------------------------
-    def sections(self, text):
-        """
-            Section flags --> R => References,
-                              T => Title,
-                              B => Body,
-                              C => Category,
-                              E => External links
-        """
+        total_toks = len(re.findall(r'\w+', title_string))
 
-        # text = text.encode("ascii", "ignore")
-        new_text = text
+        title_string = re.sub('\\b[-\.]\\b', '', title_string)
+        title_string = re.sub('[^A-Za-z0-9\{\}\[\]\=]+', ' ', title_string)
+        for each_word in wordpunct_tokenize(title_string):
+            # each_word = each_word.lower()
+            if each_word.lower() not in self.stop_words:
+                each_word = self.stemmer.stemWord(each_word.lower())
+                if each_word not in title_frequency:
+                    title_frequency[each_word] = 0
+                title_frequency[each_word] += 1
 
-        # Different threads for parallel processing
-        threads = []
+        return title_frequency, total_toks, len(title_frequency.keys())
 
-        # Tokenize title
-        title_tokens = self.title.split()
-        self.category_size["T"] = len(title_tokens)
-        threads.append(gevent.spawn(self.tokenize, title_tokens, "T"))
+    def text_processing(self, text_string):
 
-        # Remove citation text
-        new_text = re.sub(r"\{\{[c|C]ite.*?\}\}", u"", new_text)
+        total_toks = 0
 
-        # Get the references section
-        references = ""
-        try:
-            references = references_re.search(text).group()
-        except AttributeError:
-            pass
+        text_string = re.sub('[^A-Za-z0-9\{\}\[\]\=]+',' ', text_string)
+        text_frequency = dict()
 
-        # Remove the extra words which should not be counted for index
-        if references != "":
-            references = re.sub(REFERENCES_SUB, u"", references)
-            new_text = re.sub(references_re, u"==", new_text)
-            references_tokens = references.split()
-            self.category_size["R"] = len(references_tokens)
-            threads.append(gevent.spawn(self.tokenize, references_tokens, "R"))
+        regex_category = re.compile(r'\[\[Category(.*?)\]\]')
+        table = str.maketrans(dict.fromkeys('\{\}\=\[\]'))
+        new_text = regex_category.split(text_string)
+        if len(new_text) > 1:
+            for text in new_text[1:]:
+                text = text.translate(table)
+                for word in wordpunct_tokenize(text):
+                    total_toks+=1
+                    # word = word.lower()
+                    if word.lower() not in text_frequency:
+                        text_frequency[word.lower()] = dict(t=0,b=0,i=0,c=0,l=0,r=0)
+                    text_frequency[word.lower()]['c'] += 1
+            text_string = new_text[0]
 
-        # Get Categories
-        categories = re.findall(category_re, text)
-        new_text = re.sub(category_re, u"", new_text)
-        category_tokens = []
-        if categories != []:
-            for ctg in categories:
-                category_tokens.extend(ctg[11:-2].split())
-            # Design decision - Space seperated categories
-            # are considered seperately.
-            self.category_size["C"] = len(category_tokens)
-            threads.append(gevent.spawn(self.tokenize, category_tokens, "C"))
+        new_text = text_string.split('==External links==')
+        if len(new_text) > 1:
+            new_text[1] = new_text[1].translate(table)
 
-        # Get External links
-        links = None
-        try:
-            links = external_links_re.search(text).group()
-            # new_text = re.sub(external_links_re,
-            #                   u"",
-            #                   new_text).encode("ascii", "ignore")
-            new_text = re.sub(external_links_re,
-                              u"",
-                              new_text)
-        except AttributeError:
-            pass
+            for word in wordpunct_tokenize(new_text[1]):
+                total_toks+=1
+                # word = word.lower()
+                if word.lower() not in text_frequency:
+                    text_frequency[word.lower()] = dict(t=0,b=0,i=0,c=0,l=0,r=0)
 
-        if links:
-            links = links.split("\n")
-            for link in links:
-                if link == "":
-                    break
-                links_tokens = link.split()
-                self.category_size["E"] += len(links_tokens)
-                threads.append(gevent.spawn(self.tokenize, links_tokens, "E"))
+                text_frequency[word.lower()]['l'] += 1
 
-        try:
-            infobox_tokens = infobox_re.search(new_text).group()
-            infobox_tokens = infobox_tokens.split()
-            if infobox_tokens != []:
-                threads.append(gevent.spawn(self.tokenize,
-                                            infobox_tokens,
-                                            "I"))
-                new_text = re.sub(infobox_re, "", new_text)
-        except AttributeError:
-            pass
+            text_string = new_text[0]
 
-        body_tokens = new_text.split()
-        self.category_size["B"] = len(new_text)
-        threads.append(gevent.spawn(self.tokenize, body_tokens, "B"))
+        new_text = text_string.split("{{Infobox")
 
-        # Start parallel processing
-        gevent.joinall(threads)
+        braces_count = 1
+        default_tag_type = 'i'
 
-    # --------------------------------------------------------------------------
-    def update_index(self, section, token):
+        if len(new_text) > 1:
+            new_text[0] = new_text[0].translate(table)
+            for word in wordpunct_tokenize(new_text[0]):
+                total_toks+=1
+                # word = word.lower()
+                if word.lower() not in text_frequency:
+                    text_frequency[word.lower()] = dict(t=0,b=0,i=0,c=0,l=0,r=0)
 
-        page_id = self.page_id
-        category = self.complete_index[section]
+                text_frequency[word.lower()]['b'] += 1
 
-        if token not in category:
-            category[token] = {}
-        if page_id not in category[token]:
-            category[token][page_id] = 0
+            for word in re.split(r"[^A-Za-z0-9]+",new_text[1]):
+                total_toks+=1
+                word = word.lower()
+                if "}}" in word.lower():
+                    braces_count -= 1
+                if "{{" in word.lower():
+                    braces_count += 1
+                    continue
+                if braces_count == 0:
+                    default_tag_type = 'b'
+                word = word.lower().translate(table)
 
-        category[token][page_id] += 1
-        # @Todo: Add the following to normalize
-        #.0 / self.category_size[section]
+                if word not in text_frequency:
+                    text_frequency[word] = dict(t=0,b=0,i=0,c=0,l=0,r=0)
+                text_frequency[word][default_tag_type] += 1
+        else:
+            text_string = text_string.translate(table)
+            for word in wordpunct_tokenize(text_string):
+                total_toks+=1
+                word = word.lower()
 
+                if word.lower() not in text_frequency:
+                    text_frequency[word.lower()] = dict(t=0,b=0,i=0,c=0,l=0,r=0)
+                text_frequency[word.lower()]['b'] += 1
 
-    # --------------------------------------------------------------------------
-    def is_url(self, token):
-        try:
-            tmp = url_re.match(token).group()
-            return True
-        except AttributeError:
-            return False
+        duplicate_copy = dict()
+        for term in text_frequency:
+            stemmed_term = self.stemmer.stemWord(term)
+            if stemmed_term not in duplicate_copy:
+                duplicate_copy[stemmed_term] = text_frequency[term]
+            else:
+                for key in duplicate_copy[stemmed_term]:
+                    duplicate_copy[stemmed_term][key] += text_frequency[term][key]
 
-    # --------------------------------------------------------------------------
-    def is_number(self, token):
-        try:
-            number_re.match(token).group()
-            return True
-        except:
-            return False
+        text_frequency = dict()
+        for term in duplicate_copy:
+            if term not in self.stop_words or term != '':
+                text_frequency[term] = duplicate_copy[term]
 
-    # --------------------------------------------------------------------------
-    def tokenize(self, tokens, section):
-
-        for token in tokens:
-            splitted = re.split(u"(\|)|\-|\:|\;|\?|\(|\)|\*|\=|\\|\&|\/|\<|\>|\[|\]|\{|\}|\#|\+|\&|\%20|\_|\&nbsp|(\')|(\")", token)
-            for i in splitted:
-                if i is not None and len(i) > 1:
-                    tmpi = i.strip(NOISE)
-                    if tmpi not in NOISE_FILTER:
-                        tmpi = self.stemmer.stem(tmpi)
-                        tmpi = tmpi.strip(NOISE)
-                        # tmpi = filter(lambda x: x in printable, tmpi)
-                        # print(list(tmpi))
-                        self.update_index(section, tmpi)
-
-    def get_index(self):
-        return self.complete_index
-
-# ------------------------------------------------------------------------------
+        return text_frequency, total_toks, len(text_frequency.keys())

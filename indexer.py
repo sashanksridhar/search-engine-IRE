@@ -1,52 +1,74 @@
-from typing import Dict
-import gevent
+import xml.sax
+import parserDoc
+import time
+import shutil
 import os
-class Indexer():
-    def __init__(self, index_dir):
-        self.index_dir = index_dir
+import sys
+import errno
 
-    def dump_index(self,indexfile_no, complete_index:Dict):
-        self.create_index(indexfile_no, complete_index)
-        complete_index = {"T": {}, "B": {}, "C": {}, "R": {}, "E": {}, "I": {}}
-        indexfile_no += 1
-        return indexfile_no, complete_index
+if __name__ == "__main__":
+    sys.setrecursionlimit(1500)
 
-    def create_index(self, indexfile_no, complete_index:Dict):
-        """
-            Write the complete_index to a file with a different format
-        """
+    # wiki_path = 'sample.xml'
+    wiki_path = sys.argv[1]
+    print(wiki_path)
+    # wiki_path = 'E:\\IIIT-Hyderabad\\Monsoon2022\\IRE\\enwiki-20220720-pages-articles-multistream15.xml-p15824603p17324602\\enwiki-20220720-pages-articles-multistream15.xml-p15824603p17324602'
 
-        # @Todo: Yet to sort by tf in each file
+    # index_path = "E:\\IIIT-Hyderabad\\Monsoon2022\\IRE\\enwiki-20220720-pages-articles-multistream15.xml-p15824603p17324602\\index_path_new"
+    # index_path = "index_path"
+    index_path = sys.argv[2]
 
-        threads = []
-        for section in complete_index:
-            threads.append(gevent.spawn(self.write_to_index, section, indexfile_no, complete_index))
-        gevent.joinall(threads)
+    # stats_file = 'index_path/invertedindex_stat.txt'
+    stats_file = sys.argv[3]
+    # stats_file = "E:\\IIIT-Hyderabad\\Monsoon2022\\IRE\\enwiki-20220720-pages-articles-multistream15.xml-p15824603p17324602\\index_path_new\\invertedindex_stat.txt"
 
-    def write_to_index(self, section,indexfile_no, complete_index:Dict):
+    if not os.path.exists(os.path.join(index_path, 'intermediate')):
+        try:
+            os.makedirs(os.path.join(index_path, 'intermediate'))
+        except OSError as e:
+            if e.errno == errno.EEXIST:
+                raise
 
-        index_mappings = {"T": "title/",
-                          "B": "body/",
-                          "C": "category/",
-                          "R": "references/",
-                          "E": "links/",
-                          "I": "infobox/"}
+    try:
+        os.remove(os.path.join(index_path, 'DocID_Title_mapping.txt'))
+    except OSError as e:
+        pass
 
-        category_index = complete_index
+    try:
+        os.remove(stats_file)
+    except OSError as e:
+        pass
 
-        filename = self.index_dir + "/" + index_mappings[section] + "file" + str(indexfile_no)
-        # Store current sys.stdout
-        os.makedirs(os.path.dirname(filename), exist_ok=True)
-        # prev_stdout = sys.stdout
-        f = open(filename, "w", encoding="utf-8")
+    parse = xml.sax.make_parser()
 
-        for token in sorted(category_index[section].items()):
-            line = token[0] + "#"
-            for doc_id in token[1]:
-                line += hex(int(doc_id))[2:] + "-" + \
-                        str(category_index[section][token[0]][doc_id]) + ";"
-            f.write(line)
-            # line[:-1].encode("utf-8")
+    # parse.setFeature(xml.sax.handler.feature_namespaces, 0)
 
-        # Restore sys.stdout
-        # sys.stdout = prev_stdout
+    handler = parserDoc.DocParser(index_path)
+    parse.setContentHandler(handler)
+    start = time.time()
+
+    parse.parse(wiki_path)
+
+    if handler.page_count % 30000 > 0:
+        handler.writer.writing_to_file(handler.inverted_index, handler.file_count, os.path.join(index_path, 'intermediate'))
+        handler.file_count += 1
+
+    end = time.time()
+
+    handler.writer.merge_files(handler.file_count, index_path)
+
+    shutil.rmtree(os.path.join(index_path,'intermediate'))
+    handler.writer.create_offset_files(index_path)
+
+    with open(stats_file, 'w+', encoding='utf-8') as stats_file:
+        stats_file.write(str(handler.total_toks))
+        stats_file.write('\n')
+        stats_file.write(str(handler.index_toks))
+
+    stats_file.close()
+
+
+    os.remove(os.path.join(index_path, "offset_file.txt"))
+
+    print("Time taken - " + str(end - start) + " s")
+

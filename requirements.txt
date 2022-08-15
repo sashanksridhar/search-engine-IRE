@@ -1,3 +1,2 @@
 PyStemmer
 nltk
-gevent
