@@ -1,15 +1,29 @@
 import re
-# RE to remove urls
-reUrl = re.compile(r'http[s]?://(?:[a-zA-Z]|[0-9]|[$-_@.&+]|[!*\(\),]|(?:%[0-9a-fA-F][0-9a-fA-F]))+',re.DOTALL)
+from nltk.corpus import stopwords
+STOP_WORDS = list(stopwords.words('english'))
 
-# RE to remove tags & css
-reTags = re.compile(r'{\|(.*?)\|}',re.DOTALL)
+references_re = re.compile(u"={2,3} ?references ?={2,3}.*?={2,3}", re.DOTALL)
+external_links_re = re.compile(u"={2,3} ?external links?={2,3}.*?\n\n", re.DOTALL)
+category_re = re.compile(u"\[\[category:.*?\]\]", re.DOTALL)
+infobox_re = re.compile(u"\{\{infobox.*?\}\}", re.DOTALL)
+url_re = re.compile(u"((http[s]?:\/\/)|(www\.))(?:[a-zA-Z]|[0-9]|[$-_@.&+]|[!*\(\),]|(?:%[0-9a-fA-F][0-9a-fA-F]))+")
+number_re = re.compile(u"(\d+\,?)+(\.)?\d+")
 
-# Regular Expression to remove {{cite **}} or {{vcite **}}
-reCite = re.compile(r'{{v?cite(.*?)}}',re.DOTALL)
 
-# Regular Expression to remove [[file:]]
-reFile = re.compile(r'\[\[file:(.*?)\]\]',re.DOTALL)
+UNNECESSARY = ["access", "first", "title", "url", "date", "publisher", "last", "location", "cite", "web", "book", "article", "author", "year", "isbn", "ref", "editor", "volume", "issue"]
 
-# pattern to get only alphnumeric text
-reText = re.compile("[^a-zA-Z0-9]")
+
+REFERENCES_SUB = "(={2,3} ?[rR]eferences ?={2,3})|(={2,3})|" + "|".join(UNNECESSARY)
+
+# Extra noise
+NOISE = u".,|+-@~`:;?()*\"'=\\&/<>[]{}#!%^$ "
+
+# Noise filter | Making this dictionary to improve time
+NOISE_FILTER = {}
+# Strip with these punctuation symbols while tokenization
+PUNCTUATION = [u".", u",", u"|", u"-", u":", u";", u"?", u"(", u")", u"*", u"\"", u"\'", u"=", u'\\', u"&", u'/', u"<", u">", u"[", u"]", u"{", u"}", u"#", u"!", u"%"]
+
+filters = STOP_WORDS + PUNCTUATION + UNNECESSARY
+for stop_word in filters:
+    word = stop_word.strip()
+    NOISE_FILTER[word] = 1

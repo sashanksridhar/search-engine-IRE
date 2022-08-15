@@ -1,55 +1,48 @@
 import xml.sax
 import pageProcessor
 import indexer
-import writing
 
 class DocParser(xml.sax.ContentHandler):
 
-    def __init__(self, index_path):
+    def __init__(self, index_dir):
         self.title = ""
-        self.page = ""
+        self.page_id = ""
         self.tag = ""
+        self.page_flag = False
+        self.text = ""
         self.page_count = 0
-        self.writer = writing.Writing(index_path)
-        self.indexing = indexer.Indexer(self.writer)
+        self.page_id_title = ""
+        self.documents_scanned = 0
+        self.indexer = indexer.Indexer(index_dir)
+        self.indexfile_no = 1
+        self.complete_index = {"T": {}, "B": {}, "C": {}, "R": {}, "E": {}, "I": {}}
 
     def startElement(self, tag, attrs):
         self.tag = tag
-        if tag == "page":
-            self.page_count += 1
-
 
     def characters(self, text):
-        if self.tag == "title":
-            self.title += text
+        if self.tag == "id":
+            if self.page_flag is False:
+                self.page_id = text
+                self.page_flag = True
+        elif self.tag == "title":
+            if self.title == "" and self.title != text:
+                self.title = text
         elif self.tag == "text":
-            self.page += text
+            self.text += text
 
     def endElement(self, tag):
         if tag == "page":
-            self.writer.write_title(self.title)
-            title = pageProcessor.process(self.title)
+            self.page_count+=1
+            d = pageProcessor.PageProcessor(self.page_id, self.title, self.text, self.complete_index)
+            self.complete_index = d.get_index()
 
-            data = self.page.lower()  # Case Folding
-            data = data.split('==references==')
-            if len(data) == 1:
-                data = data[0].split('== references == ')
-            if len(data) == 1:
-                references = []
-                links = []
-                categories = []
-            else:
-                references = pageProcessor.process_references(data[1])
-                links = pageProcessor.process_links(data[1])
-                categories = pageProcessor.process_category(data[1])
-
-            infobox = pageProcessor.process_infobox(data[0])
-            body = pageProcessor.process_body(data[0])
-
+            self.page_id_title += str(self.page_id) + "," + self.title + "\n"
             self.tag = ""
             self.title = ""
             self.text = ""
-
-            self.indexing.index(self.page_count, title, body, categories, infobox, links, references)
-
-
+            self.page_flag = False
+            self.documents_scanned += 1
+            if self.documents_scanned == 1000:
+                self.indexfile_no, self.complete_index = self.indexer.dump_index(self.indexfile_no, self.complete_index)
+                self.documents_scanned = 0
