@@ -1,4 +1,3 @@
-import gevent
 from Stemmer import Stemmer
 import re
 from nltk.tokenize import wordpunct_tokenize
