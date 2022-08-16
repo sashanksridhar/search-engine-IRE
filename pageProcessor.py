@@ -2,7 +2,6 @@ from Stemmer import Stemmer
 import re
 from nltk.tokenize import wordpunct_tokenize
 from nltk.corpus import stopwords
-from collections import defaultdict
 
 class PageProcessor():
 
@@ -12,7 +11,7 @@ class PageProcessor():
 
     def title_processing(self, title_string):
 
-        title_frequency = defaultdict(int)
+        title_frequency = dict()
 
         total_toks = len(re.findall(r'\w+', title_string))
 
@@ -20,10 +19,13 @@ class PageProcessor():
         title_string = re.sub('[^A-Za-z0-9\{\}\[\]\=]+', ' ', title_string)
         for each_word in wordpunct_tokenize(title_string):
             if each_word.isnumeric():
+                # print("yes")
                 continue
-            each_word = each_word.lower()
-            if each_word not in self.stop_words:
-                each_word = self.stemmer.stemWord(each_word)
+            # each_word = each_word.lower()
+            if each_word.lower() not in self.stop_words:
+                each_word = self.stemmer.stemWord(each_word.lower())
+                if each_word not in title_frequency:
+                    title_frequency[each_word] = 0
                 title_frequency[each_word] += 1
 
         return title_frequency, total_toks, len(title_frequency.keys())
@@ -33,7 +35,7 @@ class PageProcessor():
         total_toks = 0
 
         text_string = re.sub('[^A-Za-z0-9\{\}\[\]\=]+',' ', text_string)
-        text_frequency = defaultdict(int)
+        text_frequency = dict()
 
         regex_category = re.compile(r'\[\[Category(.*?)\]\]')
         table = str.maketrans(dict.fromkeys('\{\}\=\[\]'))
@@ -45,14 +47,12 @@ class PageProcessor():
                 for word in wordpunct_tokenize(text):
                     total_toks+=1
                     if word.isnumeric():
+                        # print("yes")
                         continue
-                    word = word.lower()
-                    stemmed_term = self.stemmer.stemWord(word)
-                    if stemmed_term in self.stop_words or stemmed_term == '':
-                        continue
-                    if stemmed_term not in text_frequency:
-                        text_frequency[stemmed_term] = dict(t=0,b=0,i=0,c=0,l=0,r=0)
-                    text_frequency[stemmed_term]['c'] += 1
+                    # word = word.lower()
+                    if word.lower() not in text_frequency:
+                        text_frequency[word.lower()] = dict(t=0,b=0,i=0,c=0,l=0,r=0)
+                    text_frequency[word.lower()]['c'] += 1
             text_string = new_text[0]
 
         new_text = text_string.split('==External links==')
@@ -62,16 +62,13 @@ class PageProcessor():
             for word in wordpunct_tokenize(new_text[1]):
                 total_toks+=1
                 if word.isnumeric():
+                    # print("yes")
                     continue
-                word = word.lower()
-                stemmed_term = self.stemmer.stemWord(word)
-                if stemmed_term in self.stop_words or stemmed_term == '':
-                    continue
+                # word = word.lower()
+                if word.lower() not in text_frequency:
+                    text_frequency[word.lower()] = dict(t=0,b=0,i=0,c=0,l=0,r=0)
 
-                if stemmed_term not in text_frequency:
-                    text_frequency[stemmed_term] = dict(t=0,b=0,i=0,c=0,l=0,r=0)
-
-                text_frequency[stemmed_term]['l'] += 1
+                text_frequency[word.lower()]['l'] += 1
 
             text_string = new_text[0]
 
@@ -85,22 +82,20 @@ class PageProcessor():
             for word in wordpunct_tokenize(new_text[0]):
                 total_toks+=1
                 if word.isnumeric():
+                    # print("yes")
                     continue
-                word = word.lower()
-                stemmed_term = self.stemmer.stemWord(word)
-                if stemmed_term in self.stop_words or stemmed_term == '':
-                    continue
-                if stemmed_term not in text_frequency:
-                    text_frequency[stemmed_term] = dict(t=0,b=0,i=0,c=0,l=0,r=0)
+                # word = word.lower()
+                if word.lower() not in text_frequency:
+                    text_frequency[word.lower()] = dict(t=0,b=0,i=0,c=0,l=0,r=0)
 
-                text_frequency[stemmed_term]['b'] += 1
+                text_frequency[word.lower()]['b'] += 1
 
             for word in re.split(r"[^A-Za-z0-9]+",new_text[1]):
                 total_toks+=1
                 word = word.lower()
                 if word.isnumeric():
+                    # print("yes")
                     continue
-
                 if "}}" in word.lower():
                     braces_count -= 1
                 if "{{" in word.lower():
@@ -109,24 +104,34 @@ class PageProcessor():
                 if braces_count == 0:
                     default_tag_type = 'b'
                 word = word.lower().translate(table)
-                stemmed_term = self.stemmer.stemWord(word)
-                if stemmed_term in self.stop_words or stemmed_term == '':
-                    continue
-                if stemmed_term not in text_frequency:
-                    text_frequency[stemmed_term] = dict(t=0,b=0,i=0,c=0,l=0,r=0)
-                text_frequency[stemmed_term][default_tag_type] += 1
+
+                if word not in text_frequency:
+                    text_frequency[word] = dict(t=0,b=0,i=0,c=0,l=0,r=0)
+                text_frequency[word][default_tag_type] += 1
         else:
             text_string = text_string.translate(table)
             for word in wordpunct_tokenize(text_string):
                 total_toks+=1
                 word = word.lower()
                 if word.isnumeric():
+                    # print("yes")
                     continue
-                stemmed_term = self.stemmer.stemWord(word)
-                if stemmed_term in self.stop_words or stemmed_term == '':
-                    continue
-                if stemmed_term not in text_frequency:
-                    text_frequency[stemmed_term] = dict(t=0,b=0,i=0,c=0,l=0,r=0)
-                text_frequency[stemmed_term]['b'] += 1
+                if word.lower() not in text_frequency:
+                    text_frequency[word.lower()] = dict(t=0,b=0,i=0,c=0,l=0,r=0)
+                text_frequency[word.lower()]['b'] += 1
+
+        duplicate_copy = dict()
+        for term in text_frequency:
+            stemmed_term = self.stemmer.stemWord(term)
+            if stemmed_term not in duplicate_copy:
+                duplicate_copy[stemmed_term] = text_frequency[term]
+            else:
+                for key in duplicate_copy[stemmed_term]:
+                    duplicate_copy[stemmed_term][key] += text_frequency[term][key]
+
+        text_frequency = dict()
+        for term in duplicate_copy:
+            if term not in self.stop_words or term != '':
+                text_frequency[term] = duplicate_copy[term]
 
         return text_frequency, total_toks, len(text_frequency.keys())
