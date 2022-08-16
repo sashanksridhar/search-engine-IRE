@@ -124,7 +124,7 @@ class DocParser(xml.sax.ContentHandler):
 
             if self.page_count % 30000 == 0:
                 e1 = time.time()
-                print("Time for proc 30000 ", e1-self.s1)
+                print("Time for proc 30000 ", e1-self.st1)
                 self.writer.writing_to_file(self.inverted_index, self.file_count, os.path.join(self.index_dir, 'intermediate'))
                 self.file_count = self.file_count + 1
                 self.inverted_index = defaultdict(str)
