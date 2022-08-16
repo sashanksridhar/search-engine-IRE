@@ -83,27 +83,41 @@ class DocParser(xml.sax.ContentHandler):
             self.total_toks += total_toks
             self.index_toks += index_toks
 
-            text_frequency, total_toks, index_toks = self.page_processor.text_processing(text)
+            words_set, body_dict, category_dict, infobox_dict, link_dict, total_toks, index_toks = self.page_processor.text_processing(text)
 
             self.total_toks+=total_toks
             self.index_toks+=index_toks
 
             for word_title in title_frequency:
-                if word_title in text_frequency:
-                    text_frequency[word_title]['t'] += title_frequency[word_title]
-                else:
-                    text_frequency[word_title] = dict(d=self.page_count, t=title_frequency[word_title], b=0, i=0, c=0, l=0,
-                                                      r=0)
+                words_set.update(word_title)
 
-            for term in text_frequency:
+            for term in words_set:
                 if len(term) < 3 or term.startswith('0'):
                     continue
-                text_frequency[term]['d'] = str(self.page_count)
+
                 if term not in self.inverted_index:
                     self.inverted_index[term] = list()
-                self.inverted_index[term].append(''.join(
-                    tag + str(text_frequency[term][tag]) for tag in text_frequency[term] if
-                    text_frequency[term][tag] != 0))
+                posting = ''
+                posting+='d'
+                posting+=str(self.page_count)
+
+                if title_frequency[term]:
+                    posting += 't' + str(title_frequency[term])
+
+                if body_dict[term]:
+                    posting += 'b' + str(body_dict[term])
+
+                if category_dict[term]:
+                    posting += 'c' + str(category_dict[term])
+
+                if infobox_dict[term]:
+                    posting += 'i' + str(infobox_dict[term])
+
+                if link_dict[term]:
+                    posting += 'l' + str(link_dict[term])
+
+
+                self.inverted_index[term].append(posting)
 
 
             if self.page_count % 30000 == 0:

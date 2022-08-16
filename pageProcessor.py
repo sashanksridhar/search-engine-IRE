@@ -10,6 +10,15 @@ class PageProcessor():
         self.stemmer = Stemmer('english')
         self.stop_words = list(stopwords.words('english'))
 
+    def processing(self, word):
+        if word.isnumeric():
+            return ''
+        word = word.lower()
+        if word in self.stop_words:
+            return ''
+        stemmed_term = self.stemmer.stemWord(word)
+        return stemmed_term
+
     def title_processing(self, title_string):
 
         title_frequency = defaultdict(int)
@@ -33,10 +42,11 @@ class PageProcessor():
         total_toks = 0
 
         text_string = re.sub('[^A-Za-z0-9\{\}\[\]\=]+',' ', text_string)
-        text_frequency = defaultdict(int)
+        words_set, body_dict, category_dict, infobox_dict, link_dict = set(), defaultdict(int), defaultdict(int), defaultdict(int), defaultdict(int)
 
         regex_category = re.compile(r'\[\[Category(.*?)\]\]')
         table = str.maketrans(dict.fromkeys('\{\}\=\[\]'))
+
         new_text = regex_category.split(text_string)
         if len(new_text) > 1:
             for text in new_text[1:]:
@@ -44,15 +54,11 @@ class PageProcessor():
                 text = text.translate(table)
                 for word in wordpunct_tokenize(text):
                     total_toks+=1
-                    if word.isnumeric():
+                    stemmed_term = self.processing(word)
+                    if stemmed_term == '':
                         continue
-                    word = word.lower()
-                    stemmed_term = self.stemmer.stemWord(word)
-                    if stemmed_term in self.stop_words or stemmed_term == '':
-                        continue
-                    if stemmed_term not in text_frequency:
-                        text_frequency[stemmed_term] = dict(t=0,b=0,i=0,c=0,l=0,r=0)
-                    text_frequency[stemmed_term]['c'] += 1
+                    words_set.update([stemmed_term])
+                    category_dict[stemmed_term] += 1
             text_string = new_text[0]
 
         new_text = text_string.split('==External links==')
@@ -61,17 +67,12 @@ class PageProcessor():
 
             for word in wordpunct_tokenize(new_text[1]):
                 total_toks+=1
-                if word.isnumeric():
-                    continue
-                word = word.lower()
-                stemmed_term = self.stemmer.stemWord(word)
-                if stemmed_term in self.stop_words or stemmed_term == '':
+                stemmed_term = self.processing(word)
+                if stemmed_term == '':
                     continue
 
-                if stemmed_term not in text_frequency:
-                    text_frequency[stemmed_term] = dict(t=0,b=0,i=0,c=0,l=0,r=0)
-
-                text_frequency[stemmed_term]['l'] += 1
+                words_set.update([stemmed_term])
+                link_dict[stemmed_term] += 1
 
             text_string = new_text[0]
 
@@ -84,22 +85,14 @@ class PageProcessor():
             new_text[0] = new_text[0].translate(table)
             for word in wordpunct_tokenize(new_text[0]):
                 total_toks+=1
-                if word.isnumeric():
+                stemmed_term = self.processing(word)
+                if stemmed_term == '':
                     continue
-                word = word.lower()
-                stemmed_term = self.stemmer.stemWord(word)
-                if stemmed_term in self.stop_words or stemmed_term == '':
-                    continue
-                if stemmed_term not in text_frequency:
-                    text_frequency[stemmed_term] = dict(t=0,b=0,i=0,c=0,l=0,r=0)
-
-                text_frequency[stemmed_term]['b'] += 1
+                words_set.update([stemmed_term])
+                body_dict[stemmed_term] += 1
 
             for word in re.split(r"[^A-Za-z0-9]+",new_text[1]):
                 total_toks+=1
-                word = word.lower()
-                if word.isnumeric():
-                    continue
 
                 if "}}" in word.lower():
                     braces_count -= 1
@@ -108,25 +101,22 @@ class PageProcessor():
                     continue
                 if braces_count == 0:
                     default_tag_type = 'b'
-                word = word.lower().translate(table)
-                stemmed_term = self.stemmer.stemWord(word)
-                if stemmed_term in self.stop_words or stemmed_term == '':
+                stemmed_term = self.processing(word.lower().translate(table))
+                if stemmed_term == '':
                     continue
-                if stemmed_term not in text_frequency:
-                    text_frequency[stemmed_term] = dict(t=0,b=0,i=0,c=0,l=0,r=0)
-                text_frequency[stemmed_term][default_tag_type] += 1
+                words_set.update([stemmed_term])
+                if default_tag_type == 'b':
+                    body_dict[stemmed_term] += 1
+                else:
+                    infobox_dict[stemmed_term] += 1
         else:
             text_string = text_string.translate(table)
             for word in wordpunct_tokenize(text_string):
                 total_toks+=1
-                word = word.lower()
-                if word.isnumeric():
+                stemmed_term = self.processing(word)
+                if stemmed_term == '':
                     continue
-                stemmed_term = self.stemmer.stemWord(word)
-                if stemmed_term in self.stop_words or stemmed_term == '':
-                    continue
-                if stemmed_term not in text_frequency:
-                    text_frequency[stemmed_term] = dict(t=0,b=0,i=0,c=0,l=0,r=0)
-                text_frequency[stemmed_term]['b'] += 1
+                words_set.update([stemmed_term])
+                body_dict[stemmed_term] += 1
 
-        return text_frequency, total_toks, len(text_frequency.keys())
+        return words_set, body_dict, category_dict, infobox_dict, link_dict, total_toks, len(words_set)
