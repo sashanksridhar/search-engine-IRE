@@ -3,8 +3,6 @@ import pageProcessor
 import writer
 from copy import deepcopy
 import os
-import time
-from collections import defaultdict
 
 class DocParser(xml.sax.ContentHandler):
 
@@ -17,7 +15,7 @@ class DocParser(xml.sax.ContentHandler):
         self.file_count = 0
         self.first = 0
 
-        self.inverted_index = defaultdict(str)
+        self.inverted_index = dict()
 
         self.istitle = False
         self.istext = False
@@ -31,8 +29,6 @@ class DocParser(xml.sax.ContentHandler):
 
         self.total_toks = 0
         self.index_toks = 0
-
-        self.st1 = time.time()
 
     def startElement(self, name,attribute):
         if name == "title":
@@ -99,7 +95,11 @@ class DocParser(xml.sax.ContentHandler):
                 if len(term) < 3 or term.startswith('0'):
                     continue
 
-                posting = str(self.page_count) + ':'
+                if term not in self.inverted_index:
+                    self.inverted_index[term] = list()
+                posting = ''
+                posting+='d'
+                posting+=str(self.page_count)
 
                 if title_frequency[term]:
                     posting += 't' + str(title_frequency[term])
@@ -117,14 +117,11 @@ class DocParser(xml.sax.ContentHandler):
                     posting += 'l' + str(link_dict[term])
 
 
-                posting += ';'
-
-                self.inverted_index[term]+=posting
+                self.inverted_index[term].append(posting)
 
 
             if self.page_count % 30000 == 0:
-                e1 = time.time()
-                print("Time for proc 30000 ", e1-self.s1)
+
                 self.writer.writing_to_file(self.inverted_index, self.file_count, os.path.join(self.index_dir, 'intermediate'))
                 self.file_count = self.file_count + 1
-                self.inverted_index = defaultdict(str)
+                self.inverted_index = dict()

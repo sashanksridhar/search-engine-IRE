@@ -5,7 +5,6 @@ import shutil
 import os
 import sys
 import errno
-from tqdm import tqdm
 
 if __name__ == "__main__":
     sys.setrecursionlimit(1500)
@@ -59,6 +58,7 @@ if __name__ == "__main__":
     handler.writer.merge_files(handler.file_count, index_path)
 
     shutil.rmtree(os.path.join(index_path,'intermediate'))
+    handler.writer.create_offset_files(index_path)
 
     with open(stats_file, 'w+', encoding='utf-8') as stats_file:
         stats_file.write(str(handler.total_toks))
@@ -67,71 +67,8 @@ if __name__ == "__main__":
 
     stats_file.close()
 
-    num_tokens_final = 0
-    with open(os.path.join(index_path,'tokens_info.txt'), 'r', encoding='utf-8') as f:
-        for line in f:
-            num_tokens_final += 1
 
-    with open(os.path.join(index_path,'num_tokens.txt'), 'w', encoding='utf-8') as f:
-        f.write(str(num_tokens_final))
-
-    char_list = [chr(i) for i in range(97, 123)]
-    num_list = [str(i) for i in range(0, 10)]
-
-    with open(os.path.join(index_path,'tokens_info.txt'), 'r', encoding='utf-8') as f:
-        for line in tqdm(f):
-            if line[0] in char_list:
-                with open(os.path.join(index_path, 'tokens_info_'+str(line[0])+'.txt'), 'a', encoding='utf-8') as t:
-                    t.write(line.strip())
-                    t.write('\n')
-
-            elif line[0] in num_list:
-                with open(os.path.join(index_path,'tokens_info_'+str(line[0])+'.txt'), 'a', encoding='utf-8') as t:
-                    t.write(line.strip())
-                    t.write('\n')
-
-            else:
-                with open(os.path.join(index_path, 'tokens_info_others.txt'), 'a', encoding='utf-8') as t:
-                    t.write(line.strip())
-                    t.write('\n')
-
-    for ch in tqdm(char_list):
-        tok_count = 0
-        try:
-            with open(os.path.join(index_path, f'tokens_info_{ch}.txt'), 'r', encoding='utf-8') as f:
-                for line in f:
-                    tok_count += 1
-        except:
-            print("File ", f'tokens_info_{ch}.txt', ' not found')
-
-
-        with open(os.path.join(index_path, f'tokens_info_{ch}_count.txt'), 'w', encoding='utf-8') as f:
-            f.write(str(tok_count))
-
-    for num in tqdm(num_list):
-        tok_count = 0
-        try:
-            with open(os.path.join(index_path, f'tokens_info_{num}.txt'), 'r', encoding='utf-8') as f:
-                for line in f:
-                    tok_count += 1
-        except:
-            print("File ", f'tokens_info_{num}.txt', ' not found')
-
-        with open(os.path.join(index_path, f'tokens_info_{num}_count.txt'), 'w', encoding='utf-8') as f:
-            f.write(str(tok_count))
-
-    try:
-        tok_count = 0
-        with open(os.path.join(index_path, 'tokens_info_others.txt'), 'r', encoding='utf-8') as f:
-            tok_count += 1
-
-        with open(os.path.join(index_path, 'tokens_info_others_count.txt'), 'w', encoding='utf-8') as f:
-            f.write(str(tok_count))
-    except:
-        pass
-
-    os.remove(os.path.join(index_path,'tokens_info.txt'))
-
+    os.remove(os.path.join(index_path, "offset_file.txt"))
 
     print("Time taken - " + str(end - start) + " s")
 
