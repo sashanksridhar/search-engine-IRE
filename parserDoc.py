@@ -3,6 +3,7 @@ import pageProcessor
 import writer
 from copy import deepcopy
 import os
+import time
 
 class DocParser(xml.sax.ContentHandler):
 
@@ -29,6 +30,7 @@ class DocParser(xml.sax.ContentHandler):
 
         self.total_toks = 0
         self.index_toks = 0
+        self.st1 = time.time()
 
     def startElement(self, name,attribute):
         if name == "title":
@@ -108,6 +110,8 @@ class DocParser(xml.sax.ContentHandler):
 
             if self.page_count % 30000 == 0:
 
+                end = time.time()
+                print("Time taken to process ",str(self.page_count), "docs ", str(end - self.st1))
                 self.writer.writing_to_file(self.inverted_index, self.file_count, os.path.join(self.index_dir, 'intermediate'))
                 self.file_count = self.file_count + 1
                 self.inverted_index = dict()
