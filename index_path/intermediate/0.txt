@@ -253,8 +253,7 @@ rearguedate2 i1d1
 reargueyear i1d1
 reargueyear2 i1d1
 ref i9d1
-refer i1d1
-reflist i1d1
+reflist r1d1
 regard i1d1
 remand i1d1
 repeat i1d1

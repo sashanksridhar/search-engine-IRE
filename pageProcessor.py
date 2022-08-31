@@ -62,6 +62,7 @@ class PageProcessor():
                     text_frequency[word.lower()]['c'] += 1
             text_string = new_text[0]
 
+
         # Links
         new_text = text_string.split('==External links==')
         if len(new_text) > 1:
@@ -76,6 +77,24 @@ class PageProcessor():
                     text_frequency[word.lower()] = dict(t=0,b=0,i=0,c=0,l=0,r=0)
 
                 text_frequency[word.lower()]['l'] += 1
+
+            text_string = new_text[0]
+
+        # References
+        new_text = text_string.split('==References==')
+
+        if len(new_text) > 1:
+            new_text[1] = new_text[1].translate(table)
+
+            for word in wordpunct_tokenize(new_text[1]):
+                total_toks+=1
+                # if word.isnumeric():
+                #     continue
+                # word = word.lower()
+                if word.lower() not in text_frequency:
+                    text_frequency[word.lower()] = dict(t=0,b=0,i=0,c=0,l=0,r=0)
+
+                text_frequency[word.lower()]['r'] += 1
 
             text_string = new_text[0]
 
