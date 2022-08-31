@@ -28,9 +28,9 @@ def stem_word(word, stem_words):
 
 def query_processing(query, hindi_query=False):
     if hindi_query:
-        with open('hindi_stopwords.txt', 'r') as f:
+        with open('hindi_stopwords.txt', 'r', encoding='utf-8') as f:
             stop_words = [word.strip() for word in f]
-        with open('hindi_stem_words.txt', 'r') as f:
+        with open('hindi_stem_words.txt', 'r', encoding='utf-8') as f:
             stem_words = [word.strip() for word in f]
     else:
         stemmer = Stemmer('english')

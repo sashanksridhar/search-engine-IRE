@@ -10,9 +10,9 @@ class PageProcessor():
 
         self.hindi_indexer = hindi_indexer
         if self.hindi_indexer:
-            with open('hindi_stem_words.txt', 'r') as f:
+            with open('hindi_stem_words.txt', 'r', encoding='utf-8') as f:
                 self.stem_words = [word.strip() for word in f]
-            with open('hindi_stopwords.txt', 'r') as f:
+            with open('hindi_stopwords.txt', 'r', encoding='utf-8') as f:
                 self.stop_words = [word.strip() for word in f]
         else:
             #Stemmer
