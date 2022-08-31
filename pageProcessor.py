@@ -137,8 +137,8 @@ class PageProcessor():
             for word in re.split(r"[^A-Za-z0-9]+",new_text[1]):
                 total_toks+=1
                 word = word.lower()
-                # if word.isnumeric():
-                #     continue
+                if word.isnumeric():
+                    continue
                 if "}}" in word.lower():
                     braces_count -= 1
                 if "{{" in word.lower():
