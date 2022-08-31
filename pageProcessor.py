@@ -6,11 +6,26 @@ from collections import defaultdict
 
 class PageProcessor():
 
-    def __init__(self):
-        #Stemmer
-        self.stemmer = Stemmer('english')
-        #List of stop words
-        self.stop_words = list(stopwords.words('english'))
+    def __init__(self, hindi_indexer=False):
+
+        self.hindi_indexer = hindi_indexer
+        if self.hindi_indexer:
+            with open('hindi_stem_words.txt', 'r') as f:
+                self.stem_words = [word.strip() for word in f]
+            with open('hindi_stopwords.txt', 'r') as f:
+                self.stop_words = [word.strip() for word in f]
+        else:
+            #Stemmer
+            self.stemmer = Stemmer('english')
+            #List of stop words
+            self.stop_words = list(stopwords.words('english'))
+
+    def stem_word(self, word):
+        for wrd in self.stem_words:
+            if word.endswith(wrd):
+                word = word[:-len(wrd)]
+                return word
+        return word
 
     def title_processing(self, title_string):
 
@@ -28,7 +43,10 @@ class PageProcessor():
             #     continue
             if each_word.lower() not in self.stop_words:
                 #Stem Word
-                each_word = self.stemmer.stemWord(each_word.lower())
+                if self.hindi_indexer:
+                    each_word = self.stem_word(each_word.lower())
+                else:
+                    each_word = self.stemmer.stemWord(each_word.lower())
                 title_dict[each_word] += 1
 
         return title_dict, total_toks, len(title_dict.keys())
@@ -147,7 +165,11 @@ class PageProcessor():
 
         duplicate_copy = dict()
         for term in text_frequency:
-            stemmed_term = self.stemmer.stemWord(term)
+            if self.hindi_indexer:
+                stemmed_term = self.stem_word(term)
+            else:
+                stemmed_term = self.stemmer.stemWord(term)
+
             if stemmed_term not in duplicate_copy:
                 duplicate_copy[stemmed_term] = text_frequency[term]
             else:

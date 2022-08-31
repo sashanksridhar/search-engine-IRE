@@ -7,7 +7,7 @@ import time
 
 class DocParser(xml.sax.ContentHandler):
 
-    def __init__(self, index_dir):
+    def __init__(self, index_dir, hindi_indexer=False):
         self.title = ""
         self.text = ""
         self.docid = ""
@@ -24,7 +24,7 @@ class DocParser(xml.sax.ContentHandler):
 
         self.first = 0
 
-        self.page_processor = pageProcessor.PageProcessor()
+        self.page_processor = pageProcessor.PageProcessor(hindi_indexer)
         self.writer = writer.Writer()
         self.index_dir = index_dir
 

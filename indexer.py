@@ -22,6 +22,13 @@ if __name__ == "__main__":
     stats_file = sys.argv[3]
     # stats_file = "E:\\IIIT-Hyderabad\\Monsoon2022\\IRE\\enwiki-20220720-pages-articles-multistream15.xml-p15824603p17324602\\index_path_new\\invertedindex_stat.txt"
 
+    if len(sys.argv) == 5:
+        hindi_indexer = True
+    else:
+        hindi_indexer = False
+
+    print(hindi_indexer)
+
     if not os.path.exists(os.path.join(index_path, 'intermediate')):
         try:
             os.makedirs(os.path.join(index_path, 'intermediate'))
@@ -43,7 +50,7 @@ if __name__ == "__main__":
 
     # parse.setFeature(xml.sax.handler.feature_namespaces, 0)
 
-    handler = parserDoc.DocParser(index_path)
+    handler = parserDoc.DocParser(index_path, hindi_indexer)
     parse.setContentHandler(handler)
     start = time.time()
 
