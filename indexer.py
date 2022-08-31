@@ -7,7 +7,7 @@ import sys
 import errno
 
 if __name__ == "__main__":
-    sys.setrecursionlimit(1500)
+    # sys.setrecursionlimit(1500)
 
     # wiki_path = 'sample.xml'
     wiki_path = sys.argv[1]
@@ -57,7 +57,7 @@ if __name__ == "__main__":
 
     handler.writer.merge_files(handler.file_count, index_path)
 
-    shutil.rmtree(os.path.join(index_path,'intermediate'))
+    # shutil.rmtree(os.path.join(index_path,'intermediate'))
     handler.writer.create_offset_files(index_path)
 
     with open(stats_file, 'w+', encoding='utf-8') as stats_file:

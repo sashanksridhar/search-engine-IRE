@@ -3,6 +3,7 @@ import re
 import math
 import operator
 
+# Binary Search Lower Bound
 def lower_bound_search(list_of_files,target):
 	l,r = 0, len(list_of_files) - 1
 
@@ -15,31 +16,32 @@ def lower_bound_search(list_of_files,target):
 
 	return list_of_files[l-1]
 
+
 def get_offsets(file_name, index_path):
 	"""
 	Returns a list containing all the offsets based on the file_name given
 	"""
-	offset = list()
 	file_path = os.path.join(os.path.join(index_path, 'temp_offsets'),file_name)
 	with open(file_path,'r', encoding='utf-8') as file_ptr:
-		for line in file_ptr.readlines():
-			offset_value = int(line.strip().split(' ')[1])
-			offset.append(offset_value)
-
+		offset = [int(line.strip().split(' ')[1]) for line in file_ptr.readlines()]
 	return offset
 
+# Binary search a word
 def get_offset(word,low,high,file_ptr,list_offsets):
 
 	while low <= high:
 		mid = (high + low)/2
 		file_ptr.seek(list_offsets[int(mid)])
+		# print(file_ptr.readline().strip().split(' '))
 		value,offset = file_ptr.readline().strip().split(' ')
 		another_value,offset1 = file_ptr.readline().strip().split(' ')
 
+		# Even and Odd matches
 		if value == word:
 			return list_offsets[int(mid)]
 		if another_value == word:
 			return list_offsets[int(mid) + 1]
+		#If not matched
 		if value < word:
 			low = mid + 1
 		else:
@@ -49,12 +51,14 @@ def get_offset(word,low,high,file_ptr,list_offsets):
 def get_posting_list(index_file,offset_value,key):
 	index_file.seek(offset_value)
 	line = index_file.readline().strip().split(' ')[1].split('|')
-
+	# Generic Search
 	if key == 'all':
 		return line
+	# Field Queries
 	value = list(v for v in line if key in v)
 	return value
 
+# Page Rank
 def ranking(pages,number_document):
 	values = dict()
 	for page in pages:
@@ -128,10 +132,15 @@ def searching(query,index_path,number_document):
 				file_name = lower_bound_search(list_of_files,word)
 				offsets = get_offsets(file_name, index_path)
 				offset = get_offset(word,0,len(offsets), index_file_ptr, offsets)
-				if offset == -1:
-					continue
-				mapping = {'title' : 't', 'body' : 'b', 'infobox': 'i', 'category': 'c', 'links':'l', 'ref' : 'r'}
-				key1 = mapping[key]
+				# if offset == -1:
+				# 	continue
+				# mapping = {'title' : 't', 'body' : 'b', 'infobox': 'i', 'category': 'c', 'links':'l', 'ref' : 'r'}
+				# print(key)
+				# if len(key) != 1:
+				# 	key1 = mapping[key]
+				# else:
+
+				key1 = key
 				posting_list = get_posting_list(index_file_ptr, offset, key1)
 				#print("Posting List")
 				#print(posting_list)

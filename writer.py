@@ -3,11 +3,14 @@ import os
 import heapq
 import shutil
 class Writer():
+
+    # Writing to intermediate index
+    # Example : abstent i4c1d1
     def writing_to_file(self, Inverted_Index, File_count, file_path):
 
         path_to_write = os.path.join(file_path, str(File_count) + '.txt')
         print(path_to_write)
-        # print("File",str(File_count))
+
         value = list()
         file_pointer = open(path_to_write, 'w+', encoding='utf-8')
         for term in sorted(Inverted_Index):
@@ -19,6 +22,7 @@ class Writer():
 
         file_pointer.close()
 
+    # Merge intermediate index files into single file
     def merge_files(self, file_count, index_path):
 
         if not os.path.exists(index_path):
@@ -100,7 +104,9 @@ class Writer():
                 word_text = word_text + '|'.join(list(item for item in inverted_index[word]))
                 offset_list.append(offset_term)
                 items_to_write.append(word_text)
-                offset = offset + len(word_text) + 1
+                offset = offset + len(word_text) + 2
+                # print(offset)
+                # print(offset_term)
 
             if len(offset_list):
                 file_pointer1.write('\n'.join(offset_list).encode('utf-8').decode())

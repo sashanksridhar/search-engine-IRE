@@ -18,7 +18,7 @@ def get_titles(index_path):
 
 
 index_path = sys.argv[1]
-query_str = sys.argv[2]
+query_path = sys.argv[2]
 print("Loading Titles-Document ID Mappings....")
 titles = get_titles(index_path)
 number_document = len(titles)
@@ -27,19 +27,36 @@ print("Loaded...")
 # output_path = sys.argv[2]
 #file_ptr_output = open(output_path, 'w+')
 
-start = time.time()
-processed_queries = query_processing(query_str)
-result = searching(processed_queries,index_path,number_document)
-#print(result)
-print("Results : ")
-if len(result) > 0:
-    if len(result) > 10:
-        result = result[:10]
-    for r in result:
-        #print("Title of the Document : ", titles[r[0]])
-        print(titles[r[0]])
-        #file_ptr_output.write('\n')
-#file_ptr_output.write('\n')
-#file_ptr_output.write('\n')
-end = time.time()
-print("Response Time for the Query " + query_str + " is " +  str(end - start) + " seconds")
+
+
+with open(query_path, "r", encoding='utf-8') as f:
+	with open('queries_op.txt', 'w') as w:
+		while True:
+			query_str = f.readline()
+			if not query_str:
+				break
+
+			start = time.time()
+			processed_queries = query_processing(query_str)
+			# print(processed_queries)
+			result = searching(processed_queries,index_path,number_document)
+			end = time.time()
+			#print(result)
+			print("Results : ")
+			if len(result) > 0:
+				if len(result) > 10:
+					result = result[:10]
+				for r in result:
+					print(r[0])
+					print(titles[r[0]])
+
+					w.write(str(r[0])+", "+titles[r[0]]+"\n")
+
+					#file_ptr_output.write('\n')
+			#file_ptr_output.write('\n')
+			#file_ptr_output.write('\n')
+			print("Response Time for the Query " + query_str + " is " + str(end - start) + " seconds")
+			w.write(str(end-start)+"\n")
+			w.write("\n")
+
+
