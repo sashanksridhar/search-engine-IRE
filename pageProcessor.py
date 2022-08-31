@@ -39,8 +39,8 @@ class PageProcessor():
 
         # Tokenize
         for each_word in wordpunct_tokenize(title_string):
-            # if each_word.isnumeric():
-            #     continue
+            if each_word.isnumeric():
+                continue
             if each_word.lower() not in self.stop_words:
                 #Stem Word
                 if self.hindi_indexer:
@@ -72,8 +72,8 @@ class PageProcessor():
                 text = text.translate(table)
                 for word in wordpunct_tokenize(text):
                     total_toks+=1
-                    # if word.isnumeric():
-                    #     continue
+                    if word.isnumeric():
+                        continue
                     # word = word.lower()
                     if word.lower() not in text_frequency:
                         text_frequency[word.lower()] = dict(t=0,b=0,i=0,c=0,l=0,r=0)
@@ -88,8 +88,8 @@ class PageProcessor():
 
             for word in wordpunct_tokenize(new_text[1]):
                 total_toks+=1
-                # if word.isnumeric():
-                #     continue
+                if word.isnumeric():
+                    continue
                 # word = word.lower()
                 if word.lower() not in text_frequency:
                     text_frequency[word.lower()] = dict(t=0,b=0,i=0,c=0,l=0,r=0)
@@ -106,8 +106,8 @@ class PageProcessor():
 
             for word in wordpunct_tokenize(new_text[1]):
                 total_toks+=1
-                # if word.isnumeric():
-                #     continue
+                if word.isnumeric():
+                    continue
                 # word = word.lower()
                 if word.lower() not in text_frequency:
                     text_frequency[word.lower()] = dict(t=0,b=0,i=0,c=0,l=0,r=0)
@@ -126,8 +126,8 @@ class PageProcessor():
             new_text[0] = new_text[0].translate(table)
             for word in wordpunct_tokenize(new_text[0]):
                 total_toks+=1
-                # if word.isnumeric():
-                #     continue
+                if word.isnumeric():
+                    continue
                 # word = word.lower()
                 if word.lower() not in text_frequency:
                     text_frequency[word.lower()] = dict(t=0,b=0,i=0,c=0,l=0,r=0)
@@ -156,9 +156,9 @@ class PageProcessor():
             for word in wordpunct_tokenize(text_string):
                 total_toks+=1
                 word = word.lower()
-                # if word.isnumeric():
-                #     # print("yes")
-                #     continue
+                if word.isnumeric():
+                    # print("yes")
+                    continue
                 if word.lower() not in text_frequency:
                     text_frequency[word.lower()] = dict(t=0,b=0,i=0,c=0,l=0,r=0)
                 text_frequency[word.lower()]['b'] += 1
