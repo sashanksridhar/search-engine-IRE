@@ -7,7 +7,7 @@ import time
 
 class DocParser(xml.sax.ContentHandler):
 
-    def __init__(self, index_dir, hindi_indexer=False):
+    def __init__(self, index_dir, hindi_indexer):
         self.title = ""
         self.text = ""
         self.docid = ""
@@ -91,11 +91,12 @@ class DocParser(xml.sax.ContentHandler):
             self.index_toks+=index_toks
 
             for word_title in title_frequency:
+
                 if word_title in text_frequency:
                     text_frequency[word_title]['t'] += title_frequency[word_title]
                 else:
                     text_frequency[word_title] = dict(d=self.page_count, t=title_frequency[word_title], b=0, i=0, c=0, l=0,
-                                                      r=0)
+                                            r=0)
 
             for term in text_frequency:
                 if len(term) < 3 or term.startswith('0'):
