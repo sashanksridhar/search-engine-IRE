@@ -4,6 +4,9 @@ import heapq
 import shutil
 class Writer():
 
+    def __init__(self, hindi_indexer):
+        self.hindi_indexer = hindi_indexer
+
     # Writing to intermediate index
     # Example : abstent i4c1d1
     def writing_to_file(self, Inverted_Index, File_count, file_path):
@@ -104,10 +107,11 @@ class Writer():
                 word_text = word_text + '|'.join(list(item for item in inverted_index[word]))
                 offset_list.append(offset_term)
                 items_to_write.append(word_text)
-                word_text = word_text.encode('utf-8')
+                if self.hindi_indexer:
+                    word_text = word_text.encode('utf-8')
                 offset = offset + len(word_text) + 2
-                print(offset)
-                print(offset_term)
+                # print(offset)
+                # print(offset_term)
 
             if len(offset_list):
                 file_pointer1.write('\n'.join(offset_list).encode('utf-8').decode())

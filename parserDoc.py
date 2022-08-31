@@ -25,7 +25,7 @@ class DocParser(xml.sax.ContentHandler):
         self.first = 0
 
         self.page_processor = pageProcessor.PageProcessor(hindi_indexer)
-        self.writer = writer.Writer()
+        self.writer = writer.Writer(hindi_indexer)
         self.index_dir = index_dir
 
         self.total_toks = 0
