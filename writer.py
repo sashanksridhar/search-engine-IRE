@@ -104,9 +104,10 @@ class Writer():
                 word_text = word_text + '|'.join(list(item for item in inverted_index[word]))
                 offset_list.append(offset_term)
                 items_to_write.append(word_text)
+                word_text = word_text.encode('utf-8')
                 offset = offset + len(word_text) + 2
-                # print(offset)
-                # print(offset_term)
+                print(offset)
+                print(offset_term)
 
             if len(offset_list):
                 file_pointer1.write('\n'.join(offset_list).encode('utf-8').decode())
@@ -119,6 +120,7 @@ class Writer():
             file_pointer.close()
             file_pointer1.close()
         except Exception as e:
+            print(e)
             print("Error while opening the Index File. Exiting..")
         finally:
             file_pointer.close()

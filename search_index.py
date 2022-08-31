@@ -35,7 +35,7 @@ print("Loaded...")
 
 
 with open(query_path, "r", encoding='utf-8') as f:
-	with open('queries_op.txt', 'w') as w:
+	with open('queries_op.txt', 'w', encoding='utf-8') as w:
 		while True:
 			query_str = f.readline()
 			if not query_str:

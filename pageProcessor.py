@@ -3,7 +3,7 @@ import re
 from nltk.tokenize import wordpunct_tokenize
 from nltk.corpus import stopwords
 from collections import defaultdict
-
+from HindiTokenizer import Tokenizer
 
 class PageProcessor():
 
@@ -15,6 +15,7 @@ class PageProcessor():
                 self.stem_words = [word.strip() for word in f]
             with open('hindi_stopwords.txt', 'r', encoding='utf-8') as f:
                 self.stop_words = [word.strip() for word in f]
+            self.stemmer = Stemmer('english')
         else:
             # Stemmer
             self.stemmer = Stemmer('english')
@@ -40,7 +41,10 @@ class PageProcessor():
         if not self.hindi_indexer:
             title_string = re.sub('[^A-Za-z0-9\{\}\[\]\=]+', ' ', title_string)
         if self.hindi_indexer:
-            tokens = title_string.split()
+            t = Tokenizer(title_string)
+            t.tokenize()
+            t.remove_stop_words()
+            tokens = t.tokens
         else:
             tokens = wordpunct_tokenize(title_string)
 
@@ -68,8 +72,6 @@ class PageProcessor():
         if not self.hindi_indexer:
             text_string = re.sub('[^A-Za-z0-9\{\}\[\]\=]+', ' ', text_string)
 
-
-
         # Frequency of Page objects
         # {category, link, infobox, body}
         text_frequency = dict()
@@ -82,7 +84,10 @@ class PageProcessor():
             for text in new_text[1:]:
                 text = text.translate(table)
                 if self.hindi_indexer:
-                    tokens = text.split()
+                    t = Tokenizer(text)
+                    t.tokenize()
+                    t.remove_stop_words()
+                    tokens = t.tokens
                 else:
                     tokens = wordpunct_tokenize(text)
                 for word in tokens:
@@ -101,7 +106,10 @@ class PageProcessor():
             new_text[1] = new_text[1].translate(table)
 
             if self.hindi_indexer:
-                tokens = new_text[1].split()
+                t = Tokenizer(new_text[1])
+                t.tokenize()
+                t.remove_stop_words()
+                tokens = t.tokens
             else:
                 tokens = wordpunct_tokenize(new_text[1])
 
@@ -124,7 +132,10 @@ class PageProcessor():
             new_text[1] = new_text[1].translate(table)
 
             if self.hindi_indexer:
-                tokens = new_text[1].split()
+                t = Tokenizer(new_text[1])
+                t.tokenize()
+                t.remove_stop_words()
+                tokens = t.tokens
             else:
                 tokens = wordpunct_tokenize(new_text[1])
 
@@ -149,7 +160,10 @@ class PageProcessor():
         if len(new_text) > 1:
             new_text[0] = new_text[0].translate(table)
             if self.hindi_indexer:
-                tokens = new_text[0].split()
+                t = Tokenizer(new_text[0])
+                t.tokenize()
+                t.remove_stop_words()
+                tokens = t.tokens
             else:
                 tokens = wordpunct_tokenize(new_text[0])
 
@@ -183,7 +197,10 @@ class PageProcessor():
         else:
             text_string = text_string.translate(table)
             if self.hindi_indexer:
-                tokens = text_string.split()
+                t = Tokenizer(text_string)
+                t.tokenize()
+                t.remove_stop_words()
+                tokens = t.tokens
             else:
                 tokens = wordpunct_tokenize(text_string)
 
@@ -199,10 +216,11 @@ class PageProcessor():
 
         duplicate_copy = dict()
         for term in text_frequency:
+
+            stemmed_term = self.stemmer.stemWord(term)
+
             if self.hindi_indexer:
-                stemmed_term = self.stem_word(term)
-            else:
-                stemmed_term = self.stemmer.stemWord(term)
+                stemmed_term = self.stem_word(stemmed_term)
 
             if stemmed_term not in duplicate_copy:
                 duplicate_copy[stemmed_term] = text_frequency[term]

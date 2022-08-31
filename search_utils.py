@@ -31,11 +31,12 @@ def get_offset(word,low,high,file_ptr,list_offsets):
 
 	while low <= high:
 		mid = (high + low)/2
+		# print(list_offsets[int(mid)])
 		file_ptr.seek(list_offsets[int(mid)])
 		# print(file_ptr.readline().strip().split(' '))
 		value,offset = file_ptr.readline().strip().split(' ')
 		another_value,offset1 = file_ptr.readline().strip().split(' ')
-
+		# print(word)
 		# Even and Odd matches
 		if value == word:
 			return list_offsets[int(mid)]
