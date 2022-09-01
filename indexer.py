@@ -73,10 +73,10 @@ if __name__ == "__main__":
     # shutil.rmtree(os.path.join(index_path,'intermediate'))
     handler.writer.create_offset_files(index_path)
 
-    with open(stats_file, 'w+', encoding='utf-8') as stats_file:
-        stats_file.write(str(handler.total_toks))
-        stats_file.write('\n')
-        stats_file.write(str(handler.index_toks))
+    with open(stats_file, 'wb+') as stats_file:
+        stats_file.write(str(handler.total_toks).encode('utf-8'))
+        stats_file.write('\n'.encode('utf-8'))
+        stats_file.write(str(handler.index_toks).encode('utf-8'))
 
     stats_file.close()
 

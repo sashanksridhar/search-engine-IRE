@@ -35,7 +35,7 @@ print("Loaded...")
 
 
 with open(query_path, "r", encoding='utf-8') as f:
-	with open('queries_op.txt', 'w', encoding='utf-8') as w:
+	with open('queries_op.txt', 'wb') as w:
 		while True:
 			query_str = f.readline()
 			if not query_str:
@@ -55,13 +55,13 @@ with open(query_path, "r", encoding='utf-8') as f:
 					print(r[0])
 					print(titles[r[0]])
 
-					w.write(str(r[0])+", "+titles[r[0]]+"\n")
+					w.write((str(r[0])+", "+titles[r[0]]+"\n").encode('utf-8'))
 
 					#file_ptr_output.write('\n')
 			#file_ptr_output.write('\n')
 			#file_ptr_output.write('\n')
 			print("Response Time for the Query " + query_str + " is " + str(end - start) + " seconds")
-			w.write(str(end-start)+"\n")
-			w.write("\n")
+			w.write((str(end-start)+"\n").encode('utf-8'))
+			w.write("\n".encode('utf-8'))
 
 

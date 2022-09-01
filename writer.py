@@ -15,13 +15,13 @@ class Writer():
         print(path_to_write)
 
         value = list()
-        file_pointer = open(path_to_write, 'w+', encoding="utf-8")
+        file_pointer = open(path_to_write, 'wb+')
         for term in sorted(Inverted_Index):
             temp = term + ' '
             temp = temp + '|'.join(item for item in Inverted_Index[term])
             value.append(temp)
         if len(value):
-            file_pointer.write('\n'.join(value).encode('utf-8').decode('utf-8'))
+            file_pointer.write('\n'.join(value).encode('utf-8'))
 
         file_pointer.close()
 
@@ -99,8 +99,8 @@ class Writer():
         items_to_write = list()
         offset_list = list()
         try:
-            file_pointer = open(index_file_path, 'a+', encoding='utf-8')
-            file_pointer1 = open(offset_file_path, 'a+', encoding='utf-8')
+            file_pointer = open(index_file_path, 'ab+')
+            file_pointer1 = open(offset_file_path, 'ab+')
             for word in words:
 
                 offset_term = word + ' ' + str(offset)
@@ -110,17 +110,20 @@ class Writer():
                 items_to_write.append(word_text)
                 # if self.hindi_indexer:
                 word_text = word_text.encode('utf-8')
-                offset = offset + len(word_text) + 2
+                offset = offset + len(word_text) + 1
+                # print("offset")
                 # print(offset)
                 # print(offset_term)
 
             if len(offset_list):
-                file_pointer1.write('\n'.join(offset_list).encode('utf-8').decode('utf-8'))
-                file_pointer1.write('\n')
+                file_pointer1.write('\n'.join(offset_list).encode('utf-8'))
+                file_pointer1.write('\n'.encode('utf-8'))
 
             if len(items_to_write):
-                file_pointer.write('\n'.join(items_to_write).encode('utf-8').decode('utf-8'))
-                file_pointer.write('\n')
+                file_pointer.write('\n'.join(items_to_write).encode('utf-8'))
+                # print("file pointer")
+                # print(file_pointer.tell())
+                file_pointer.write('\n'.encode('utf-8'))
 
             file_pointer.close()
             file_pointer1.close()
@@ -142,15 +145,15 @@ class Writer():
             os.mkdir(offset_path)
 
         file_ptr = None
-        with open(os.path.join(index_path, 'offset_file.txt'), encoding='utf-8') as offset_file:
+        with open(os.path.join(index_path, 'offset_file.txt'), "r", encoding='utf-8') as offset_file:
             for lineno, line in enumerate(offset_file):
                 if lineno % 1000000 == 0:
                     if file_ptr:
                         file_ptr = None
                     value = line.strip().split(' ')[0]
                     file_path = os.path.join(index_path, 'temp_offsets', value + '.txt')
-                    file_ptr = open(file_path, "w", encoding='utf-8')
-                file_ptr.write(line)
+                    file_ptr = open(file_path, "wb")
+                file_ptr.write(line.encode('utf-8'))
             if file_ptr:
                 file_ptr.close()
 

@@ -64,9 +64,9 @@ class DocParser(xml.sax.ContentHandler):
 
         if name == "page":
             self.page_count+=1
-            file_pointer = open(os.path.join(self.index_dir, "DocID_Title_mapping.txt"), 'a+', encoding='utf-8')
+            file_pointer = open(os.path.join(self.index_dir, "DocID_Title_mapping.txt"), 'ab+')
             if self.first == 1:
-                file_pointer.write('\n')
+                file_pointer.write('\n'.encode('utf-8'))
 
             if self.first == 0:
                 self.first = 1
@@ -74,7 +74,7 @@ class DocParser(xml.sax.ContentHandler):
             value = str(self.page_count) + ' ' + self.title
             value = value.encode('utf-8').decode('utf-8')
 
-            file_pointer.write(value)
+            file_pointer.write(value.encode('utf-8'))
             file_pointer.close()
 
             text = deepcopy(self.text)
