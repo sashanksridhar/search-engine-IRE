@@ -72,7 +72,7 @@ class DocParser(xml.sax.ContentHandler):
                 self.first = 1
 
             value = str(self.page_count) + ' ' + self.title
-            value = value.encode('utf-8').decode()
+            value = value.encode('utf-8').decode('utf-8')
 
             file_pointer.write(value)
             file_pointer.close()

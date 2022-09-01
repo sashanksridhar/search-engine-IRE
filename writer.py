@@ -15,13 +15,13 @@ class Writer():
         print(path_to_write)
 
         value = list()
-        file_pointer = open(path_to_write, 'w+', encoding='utf-8')
+        file_pointer = open(path_to_write, 'w+', encoding="utf-8")
         for term in sorted(Inverted_Index):
             temp = term + ' '
             temp = temp + '|'.join(item for item in Inverted_Index[term])
             value.append(temp)
         if len(value):
-            file_pointer.write('\n'.join(value).encode('utf-8').decode())
+            file_pointer.write('\n'.join(value).encode('utf-8').decode('utf-8'))
 
         file_pointer.close()
 
@@ -115,11 +115,11 @@ class Writer():
                 # print(offset_term)
 
             if len(offset_list):
-                file_pointer1.write('\n'.join(offset_list).encode('utf-8').decode())
+                file_pointer1.write('\n'.join(offset_list).encode('utf-8').decode('utf-8'))
                 file_pointer1.write('\n')
 
             if len(items_to_write):
-                file_pointer.write('\n'.join(items_to_write).encode('utf-8').decode())
+                file_pointer.write('\n'.join(items_to_write).encode('utf-8').decode('utf-8'))
                 file_pointer.write('\n')
 
             file_pointer.close()

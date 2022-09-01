@@ -56,6 +56,12 @@ if __name__ == "__main__":
 
     parse.parse(wiki_path)
 
+    # with open(wiki_path, "rb") as f:
+    #     input_source = xml.sax.xmlreader.InputSource()
+    #     input_source.setByteStream(f)
+    #     input_source.setEncoding('cp1252')
+    #     parse.parse(input_source)
+
     if handler.page_count % 30000 > 0:
         handler.writer.writing_to_file(handler.inverted_index, handler.file_count, os.path.join(index_path, 'intermediate'))
         handler.file_count += 1
