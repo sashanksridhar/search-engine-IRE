@@ -66,6 +66,8 @@ class PageProcessor():
     # Body Processing
     def text_processing(self, text_string):
 
+        regex = re.compile('[@_!#$%^&*()<>?/\|}{~:]')
+
         # Token Counter for the page
         total_toks = 0
 
@@ -92,7 +94,7 @@ class PageProcessor():
                     tokens = wordpunct_tokenize(text)
                 for word in tokens:
                     total_toks += 1
-                    if word.isnumeric() or '|' in word:
+                    if word.isnumeric() or regex.search(word) != None:
                         continue
                     # word = word.lower()
                     if word.lower() not in text_frequency:
@@ -115,7 +117,7 @@ class PageProcessor():
 
             for word in tokens:
                 total_toks += 1
-                if word.isnumeric()or '|' in word:
+                if word.isnumeric()or regex.search(word) != None:
                     continue
                 # word = word.lower()
                 if word.lower() not in text_frequency:
@@ -141,7 +143,7 @@ class PageProcessor():
 
             for word in tokens:
                 total_toks += 1
-                if word.isnumeric()or '|' in word:
+                if word.isnumeric()or regex.search(word) != None:
                     continue
                 # word = word.lower()
                 if word.lower() not in text_frequency:
@@ -169,7 +171,7 @@ class PageProcessor():
 
             for word in tokens:
                 total_toks += 1
-                if word.isnumeric()or '|' in word:
+                if word.isnumeric()or regex.search(word) != None:
                     continue
                 # word = word.lower()
                 if word.lower() not in text_frequency:
@@ -180,7 +182,7 @@ class PageProcessor():
             for word in re.split(r"[^A-Za-z0-9]+", new_text[1]):
                 total_toks += 1
                 word = word.lower()
-                if word.isnumeric()or '|' in word:
+                if word.isnumeric()or regex.search(word) != None:
                     continue
                 if "}}" in word.lower():
                     braces_count -= 1
@@ -207,7 +209,7 @@ class PageProcessor():
             for word in tokens:
                 total_toks += 1
                 word = word.lower()
-                if word.isnumeric()or '|' in word:
+                if word.isnumeric() or regex.search(word) != None:
                     # print("yes")
                     continue
                 if word.lower() not in text_frequency:
