@@ -92,7 +92,7 @@ class PageProcessor():
                     tokens = wordpunct_tokenize(text)
                 for word in tokens:
                     total_toks += 1
-                    if word.isnumeric():
+                    if word.isnumeric() or '|' in word:
                         continue
                     # word = word.lower()
                     if word.lower() not in text_frequency:
@@ -115,7 +115,7 @@ class PageProcessor():
 
             for word in tokens:
                 total_toks += 1
-                if word.isnumeric():
+                if word.isnumeric()or '|' in word:
                     continue
                 # word = word.lower()
                 if word.lower() not in text_frequency:
@@ -141,7 +141,7 @@ class PageProcessor():
 
             for word in tokens:
                 total_toks += 1
-                if word.isnumeric():
+                if word.isnumeric()or '|' in word:
                     continue
                 # word = word.lower()
                 if word.lower() not in text_frequency:
@@ -169,7 +169,7 @@ class PageProcessor():
 
             for word in tokens:
                 total_toks += 1
-                if word.isnumeric():
+                if word.isnumeric()or '|' in word:
                     continue
                 # word = word.lower()
                 if word.lower() not in text_frequency:
@@ -180,7 +180,7 @@ class PageProcessor():
             for word in re.split(r"[^A-Za-z0-9]+", new_text[1]):
                 total_toks += 1
                 word = word.lower()
-                if word.isnumeric():
+                if word.isnumeric()or '|' in word:
                     continue
                 if "}}" in word.lower():
                     braces_count -= 1
@@ -207,7 +207,7 @@ class PageProcessor():
             for word in tokens:
                 total_toks += 1
                 word = word.lower()
-                if word.isnumeric():
+                if word.isnumeric()or '|' in word:
                     # print("yes")
                     continue
                 if word.lower() not in text_frequency:

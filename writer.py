@@ -102,13 +102,14 @@ class Writer():
             file_pointer = open(index_file_path, 'a+', encoding='utf-8')
             file_pointer1 = open(offset_file_path, 'a+', encoding='utf-8')
             for word in words:
+
                 offset_term = word + ' ' + str(offset)
                 word_text = word + ' '
                 word_text = word_text + '|'.join(list(item for item in inverted_index[word]))
                 offset_list.append(offset_term)
                 items_to_write.append(word_text)
-                if self.hindi_indexer:
-                    word_text = word_text.encode('utf-8')
+                # if self.hindi_indexer:
+                word_text = word_text.encode('utf-8')
                 offset = offset + len(word_text) + 2
                 # print(offset)
                 # print(offset_term)
