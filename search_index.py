@@ -52,7 +52,7 @@ with open(query_path, "r", encoding='utf-8') as f:
 				if len(result) > 10:
 					result = result[:10]
 				for r in result:
-					print(r[0])
+					# print(r[0])
 					print(titles[r[0]])
 
 					w.write((str(r[0])+", "+titles[r[0]]+"\n").encode('utf-8'))
