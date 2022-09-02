@@ -2,7 +2,7 @@ import re
 from nltk.corpus import stopwords
 from Stemmer import Stemmer
 
-def identify_query_type(self, query):
+def identify_query_type(query):
 		
 		field_replace_map = {
 				' t:':';t:',
