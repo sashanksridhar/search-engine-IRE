@@ -133,8 +133,8 @@ def searching(query,index_path,number_document):
 				file_name = lower_bound_search(list_of_files,word)
 				offsets = get_offsets(file_name, index_path)
 				offset = get_offset(word,0,len(offsets), index_file_ptr, offsets)
-				# if offset == -1:
-				# 	continue
+				if offset == -1:
+					continue
 				# mapping = {'title' : 't', 'body' : 'b', 'infobox': 'i', 'category': 'c', 'links':'l', 'ref' : 'r'}
 				# print(key)
 				# if len(key) != 1:
