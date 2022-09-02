@@ -74,28 +74,67 @@ def query_processing(query, hindi_query=False):
     query = query.lower()
     # field_reg = re.finditer('(t:|i:|b:|c:|r:)([\w+\s+]+)(?=(t:|i:|b:|c:|r:|$))',query)
     if ":" in query:
-        query_bag = query.split(" ")
-        for q in query_bag:
-            field_query = q.split(":")
-            field = field_query[0]
-            query = field_query[1]
-            field = mapping_shortform(field)
-            query_words = query.split()
+        query = query.strip()
+        query1, query2 = identify_query_type(query)
+        if query2:
+            for q in query2:
+                field_query = q.split(":")
+                field = field_query[0]
+                query = field_query[1]
+                field = mapping_shortform(field)
+                query_words = query.split()
 
-            #print(term)
+                #print(term)
+                try:
+                    if hindi_query:
+                        term_list = list(stem_word(word.lower(), stem_words) for word in query_words if word not in stop_words)
+                    else:
+                        term_list = list(stemmer.stemWord(word.lower()) for word in query_words if word not in stop_words)
+                    for t in term_list:
+                        queries[field].append(t)
+                except KeyError:
+                    if hindi_query:
+                        queries[field] = list(
+                            stem_word(word.lower(), stem_words) for word in query_words if word not in stop_words)
+                    else:
+                        queries[field] = list(stemmer.stemWord(word.lower()) for word in query_words if word not in stop_words)
+            words = query1.strip().split(' ')
             try:
                 if hindi_query:
-                    term_list = list(stem_word(word.lower(), stem_words) for word in query_words if word not in stop_words)
+                    term_list = list(stem_word(word.lower(), stem_words) for word in words if word not in stop_words)
                 else:
-                    term_list = list(stemmer.stemWord(word.lower()) for word in query_words if word not in stop_words)
+                    term_list = list(stemmer.stemWord(word.lower()) for word in words if word not in stop_words)
                 for t in term_list:
-                    queries[field].append(t)
+                    queries['all'].append(t)
             except KeyError:
                 if hindi_query:
-                    queries[field] = list(
-                        stem_word(word.lower(), stem_words) for word in query_words if word not in stop_words)
+                    queries['all'] = list(stem_word(word.lower(), stem_words) for word in words if word not in stop_words)
                 else:
-                    queries[field] = list(stemmer.stemWord(word.lower()) for word in query_words if word not in stop_words)
+                    queries['all'] = list(stemmer.stemWord(word.lower()) for word in words if word not in stop_words)
+
+        elif type(query1)==type([]):
+            for q in query1:
+                field_query = q.split(":")
+                field = field_query[0]
+                query = field_query[1]
+                field = mapping_shortform(field)
+                query_words = query.split()
+
+                #print(term)
+                try:
+                    if hindi_query:
+                        term_list = list(stem_word(word.lower(), stem_words) for word in query_words if word not in stop_words)
+                    else:
+                        term_list = list(stemmer.stemWord(word.lower()) for word in query_words if word not in stop_words)
+                    for t in term_list:
+                        queries[field].append(t)
+                except KeyError:
+                    if hindi_query:
+                        queries[field] = list(
+                            stem_word(word.lower(), stem_words) for word in query_words if word not in stop_words)
+                    else:
+                        queries[field] = list(stemmer.stemWord(word.lower()) for word in query_words if word not in stop_words)
+
     else:
         words = query.strip().split(' ')
         try:
