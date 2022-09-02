@@ -2,6 +2,39 @@ import re
 from nltk.corpus import stopwords
 from Stemmer import Stemmer
 
+def identify_query_type(self, query):
+		
+		field_replace_map = {
+				' t:':';t:',
+				' b:':';b:',
+				' c:':';c:',
+				' i:':';i:',
+				' l:':';l:',
+				' r:':';r:',
+			}
+
+		if ('t:' in query or 'b:' in query or 'c:' in query or 'i:' in query or 'l:' in query or 'r:' in query) and query[0:2] not in ['t:', 'b:', 'i:', 'c:', 'r:', 'l:']:
+
+			for k, v in field_replace_map.items():
+				if k in query:
+					query = query.replace(k, v)
+
+			query = query.lstrip(';')
+
+			return query.split(';')[0], query.split(';')[1:]
+
+		elif 't:' in query or 'b:' in query or 'c:' in query or 'i:' in query or 'l:' in query or 'r:' in query:
+
+			for k, v in field_replace_map.items():
+				if k in query:
+					query = query.replace(k, v)
+
+			query = query.lstrip(';')
+
+			return query.split(';'), None
+
+		else:
+			return query, None
 
 def mapping_shortform(field):
     field = field.lower()
